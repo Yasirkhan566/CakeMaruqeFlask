@@ -1,0 +1,280 @@
+{%extends "second-layout.html"%}
+{%block content%}
+<head>
+    <title>Add New Product</title>
+    <style>
+        .selected {
+            border: 2px solid blue;
+        }
+        .hidden-gallery
+        {
+            display: none;
+        }
+        .gallery-viewer
+        {
+            position: absolute;
+            background-color: pink;
+            width: 80%;
+            margin: auto;
+        }
+
+        form {
+  /* Overall form styling */
+  background-color: #f2f2f2; /* Light gray background */
+  padding: 20px; /* Add padding around the form elements */
+  border-radius: 5px; /* Rounded corners */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow */
+}
+
+/* Input fields and textarea */
+input[type="text"],
+input[type="email"],
+textarea {
+  width: 100%; /* Full width */
+  padding: 12px; /* Padding inside the fields */
+  border: 1px solid #ccc; /* Gray border */
+  border-radius: 4px; /* Rounded corners */
+  box-sizing: border-box; /* Ensure consistent sizing */
+  margin-top: 6px; /* Spacing between fields */
+  margin-bottom: 16px;
+}
+
+/* Submit button */
+input[type="submit"] {
+  background-color: #4CAF50; /* Green background */
+  color: white; /* White text */
+  padding: 12px 20px; /* Padding for button text */
+  border: none; /* Remove default border */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Indicate interactivity */
+}
+
+/* Label styling (optional) */
+label {
+  display: block; /* Display labels on separate lines */
+  margin-bottom: 5px; /* Spacing between labels and fields */
+}
+
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+</head>
+<body>
+    <h1>Add New Product</h1>
+    <div class="product-form-div">
+        <form class="product-form" id="product-form" method="post" action="/api/insert-product" enctype="multipart/form-data">
+            <label for="product_image">Product Image</label>
+            <input type="text" id="product_selected_image_paths" name="product_selected_image_paths">
+            <div id="product_image_display"></div>
+            <a type="button" id="product_image">Upload Image</a>
+            <label for="product_name">Product Name</label>
+            <input type="text" name="product_name" id="product_name" placeholder="Product Name" required>
+            <label for="constant_price">Constnt Price</label>
+            <input type="number" id="constant_price" name="constant_price" placeholder="Constant Price" required>
+            <label for="short_description">Short Description</label>
+            <textarea name="short_description" id="short_description"></textarea>
+            <label for="long_description">Long Description</label>
+            <textarea name="long_description" id="long_description"></textarea>
+            <p>Categories</p>
+            <input type="checkbox" name="categories" value="cake">Cake
+            <input type="checkbox" name="categories" value="cupcake">Cupcake
+            <input type="checkbox" name="categories" value="Brownies">Brownies
+            <input type="checkbox" name="categories" value="baby-boy-cakes">baby-boy-cakes
+            <input type="checkbox" name="categories" value="baby-girl-cakes">baby-girl-cakes
+            <input type="checkbox" name="categories" value="boys-theme-cakes">boys-theme-cakes
+            <input type="checkbox" name="categories" value="independence-day-cakes">independence-day-cakes
+            <input type="checkbox" name="categories" value="fathers-day-cakes">fathers-day-cakes
+            <input type="checkbox" name="categories" value="mothers-day-cakes">mothers-day-cakes
+            <input type="checkbox" name="categories" value="engagement-akes">engagement-akes
+            <input type="checkbox" name="categories" value="mehndi-cakes">mehndi-cakes
+            <input type="checkbox" name="categories" value="wedding-cakes">wedding-cakes
+            <input type="checkbox" name="categories" value="bride-to-be-cakes">bride-to-be-cakes
+            <input type="checkbox" name="categories" value="graduation-cakes">graduation-cakes
+            <input type="checkbox" name="categories" value="wedding-anniversary-cakes">wedding-anniversary-cakes
+            <input type="checkbox" name="categories" value="vallentines-day-cakes">vallentines-day-cakes
+            <input type="checkbox" name="categories" value="teachers-day-cakes">teachers-day-cakes
+            <input type="checkbox" name="categories" value="rabi-ul-awal-cakes">rabi-ul-awal-cakes
+            <label for="review_images">Review Images:</label>
+            <div id="review_images_display"></div>
+            <a type="button" id="review_images">Select Images</a>
+            
+            <input type="text" id="selected_image_paths" name="selected_image_paths">
+            <label for="minimum_size">Minimum Size</label>
+            <input type="number" name="minimum_size" id="minimum_size" placeholder="Minimum Size" required>
+
+            <input type="submit" value="Submit">
+
+
+        </form>
+    </div>
+
+    <div class="hidden-gallery gallery-viewer" id="gallery-viewer">
+    <div id="gallery-container">
+    </div>
+    <!-- Upload new image form -->
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" name="upload_images" accept="image/*" required multiple>
+        <button type="submit">Upload Image</button>
+    </form>
+
+    <button type="submit" id="submit_selection">Submit Selection</button>
+    <button type="" id="close-gallery-viewer-button">Close Window</button>
+    </div>
+
+<script>
+
+    $(document).ready(function() {
+        // Open gallery viewer when input is clicked
+        $(document).on('click', '#review_images', function() {
+            // Store the input field's ID in localStorage
+            localStorage.setItem('lastClickedInput', 'review_images');
+            $('#gallery-viewer').removeClass('hidden-gallery');
+        });
+
+        $(document).on('click', '#product_image', function() {
+            // Store the input field's ID in localStorage
+            localStorage.setItem('lastClickedInput', 'product_image');
+            $('#gallery-viewer').removeClass('hidden-gallery');
+        });
+
+        
+        $('#upload-form').submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            $.ajax({
+                url: '/api/upload-images',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    // Reload gallery container with updated images
+                    $('#gallery-container').html(response.html);
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+        });
+
+        
+
+
+
+        function updateGallery() {
+            // Fetch image paths using AJAX
+            $.ajax({
+                url: '/api/get-existing-images',  // Replace with your API endpoint URL
+                type: 'GET',
+                success: function(response) {
+                    // Clear the gallery container
+                    var galleryContainer = $('#gallery-container');
+                    galleryContainer.empty();
+
+                    // Populate the gallery container with images
+                    response.forEach(function(imagePath) {
+                        var img = $('<img>').attr('src', imagePath).attr('alt', 'Image').attr('width', '150px');
+                        galleryContainer.append(img);
+                    });
+                },
+                error: function(error) {
+                    console.error('Error fetching image paths:', error);
+                }
+            });
+        }
+
+        // Update the gallery immediately and then poll for updates
+        updateGallery();
+        //setInterval(updateGallery, 5000); // Update every 5 seconds (adjust interval as needed)
+
+        var selectedImages = [];  // To store selected image paths
+        $(document).on('click', '#gallery-container img', function() {
+            var lastClickedInputID = localStorage.getItem('lastClickedInput');
+            
+            var imagePath = $(this).attr('src');
+            
+            if (lastClickedInputID == 'product_image') {
+                if (selectedImages.length === 1 && selectedImages[0] === imagePath) {
+                    // Deselect the image
+                    selectedImages.pop();
+                    $(this).removeClass('selected');
+                } else {
+                    // Deselect the previous selected image (if any)
+                    if (selectedImages.length === 1) {
+                        var previousSelectedImagePath = selectedImages.pop();
+                        $('#gallery-container img[src="' + previousSelectedImagePath + '"]').removeClass('selected');
+                    }
+                    
+                    // Select the new image
+                    selectedImages.push(imagePath);
+                    $(this).addClass('selected');
+                }
+            } else {
+                // Toggle selection for non-'product_image' cases
+                if (selectedImages.includes(imagePath)) {
+                    // Image is already selected, deselect it
+                    var index = selectedImages.indexOf(imagePath);
+                    selectedImages.splice(index, 1);
+                    $(this).removeClass('selected');
+                } else {
+                    // Image is not selected, select it
+                    selectedImages.push(imagePath);
+                    $(this).addClass('selected');
+                }
+            }
+        });
+
+        var reviewImageContainer = $('#review_images_display');
+        var productImageContainer = $('#product_image_display')
+        $(document).on('click', '#submit_selection', function() {
+            // Get the stored input field ID from cache
+            var lastClickedInputID = localStorage.getItem('lastClickedInput');
+            console.log(lastClickedInputID);
+
+            // Update the hidden input field with the selected image paths
+            if (lastClickedInputID) {
+                var selectedImagePathsInput = $('#selected_image_paths');
+                var productSelectedImagePathsInput = $('#product_selected_image_paths')
+                if(lastClickedInputID=='review_images'){
+                    selectedImagePathsInput.val(selectedImages.join(', '));  // Assign selected images as a comma-separated list
+                }
+                if(lastClickedInputID == 'product_image'){
+                    productSelectedImagePathsInput.val(selectedImages.join(', '));
+                }
+                
+                if(lastClickedInputID == 'product_image'){
+                    productImageContainer.empty();
+                }
+                if(lastClickedInputID == 'review_images'){
+                    reviewImageContainer.empty();
+                }
+
+                selectedImages.forEach(function(imagePath) {
+                        var img = $('<img>').attr('src', imagePath).attr('alt', 'Image').attr('width', '80px');
+                        if(lastClickedInputID == 'review_images'){
+                            reviewImageContainer.append(img);
+                        }
+                        if(lastClickedInputID == 'product_image'){
+                            productImageContainer.append(img);
+                        }
+                    });
+            }
+
+            // Clear the selected images array and remove stored input field ID from cache
+            selectedImages = [];
+            localStorage.removeItem('lastClickedInput');
+            $('#gallery-container img.selected').removeClass('selected');
+            $('#gallery-viewer').addClass('hidden-gallery');
+        });
+
+
+        $(document).on('click', '#close-gallery-viewer-button', function(){
+            console.log("close gallery viewer button pressed");
+            $('#gallery-viewer').addClass('hidden-gallery');
+        });
+
+    });
+</script>
+
+</body>
+{%endblock%}

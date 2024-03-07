@@ -1,0 +1,472 @@
+{%extends "second-layout.html"%}
+{%block content%}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Page</title>
+    <style>
+        body
+        {
+            font-family: sans-serif;
+        }
+        .carts-page
+        {
+            margin-top: 100px;
+        }
+        .carts-page h1
+        {
+            width: fit-content;
+            margin: auto;
+        }
+        .c-product-container
+        {
+            padding: 30px;
+            background: ghostwhite;
+            box-shadow: 0 0 3px 3px #efefef;
+            margin-bottom: 20px;
+        }
+        .cart-items
+        {
+            width: 70%;
+        }
+        .c-product-box
+        {
+            display: flex;
+            column-gap: 20px;
+            
+        }
+        .c-product-image
+        {
+            flex-basis: 200px;
+        }
+        .c-product-image a img
+        {
+            width: 100%;
+        }
+        .c-delete-item-button
+        {
+            height: fit-content;
+            padding: 5px 10px;
+        }
+        .c-product-name h3
+        {
+            margin: 0;
+        }
+        .c-product-price p
+        {
+            margin: 0;
+        }
+        .c-product-info
+        {
+            width: 40%;
+        }
+        .c-product-quantity
+        {
+            width: 20%;
+            text-align: center;
+        }
+        .c-product-price
+        {
+            width: 20%;
+            text-align: right;
+        }
+        .c-product-price h3, .c-product-quantity h3
+        {
+            margin: 0;
+            margin-bottom: 20px;
+        }
+        .c-product-quantity input
+        {
+            width: 40px;
+            border: 1px solid red;
+            padding: 5px 15px;
+            border-radius: 50px;
+            margin: 0 10px;
+        }
+        .size-button
+        {
+            padding: 5px 10px;
+            border-radius: 50px;
+            border: 2px solid burlywood;
+        }
+        .cart-details
+        {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 40px;
+        }
+        .cart-sidebar
+        {
+            width: 25%;
+            text-align: center;
+            padding: 20px 20px 57px 20px;
+            background-color: gold;
+        }
+        .flex
+        {
+            display: flex;
+            justify-content: space-between;
+        }
+        .checkout-button
+        {
+            border: navajowhite;
+            font-size: 25px;
+            width: 100%;
+            padding: 25px;
+            background: black;
+            border-radius: 50px;
+            color: white;
+            box-shadow: 0 0 3px 3px darkorange;
+        }
+        .empty-cart-button
+        {
+            width: 100%;
+            padding: 25px;
+            border: beige;
+            border-radius: 50px;
+            background: beige;
+            font-size: 20px;
+        }
+        .checkout-button-div
+        {
+            margin-bottom: 20px;
+        }
+
+        .net-total
+        {
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+            margin-bottom: 40px;
+            padding: 10px;
+        }
+       
+        .cart-list
+        {
+            margin: 20px auto;
+        } 
+        .cart-heading
+        {
+            padding: 2px 10px;
+            background: gold;
+            box-shadow: 0 0 3px 3px #ff1a1a;
+            width: 300px;
+            cursor: pointer;
+            margin: 20px;
+        }
+        .cart-heading.active
+        {
+            background: #ff1a1a;
+            box-shadow: 0 0 3px 3px gold;
+            color: white;
+        }
+        
+
+    </style>
+    <style>
+        /* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 20% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 50%;
+  text-align: center;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: black;
+}
+
+/* Additional styles as needed */
+
+    </style>
+</head>
+<body>
+    <div class="carts-page">
+    <h1>Available Carts</h1>
+    <div id="cart-list" class="cart-list">
+        
+    </div>
+
+    <!-- Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+        <h2>Checkout Options</h2>
+        <p>Please select an option to proceed:</p>
+        <button id="guestCheckoutBtn">Checkout as Guest</button>
+        <button id="loginCheckoutBtn">Login/Signup</button>
+        <span class="close">&times;</span>
+        </div>
+    </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        
+
+    </script>
+    
+
+    <script>
+        var website_id = 'cakemarque';
+        const cart_session_key = `carts_${website_id}`;
+         var sidebarDA = ''
+        $(document).ready(function() 
+        {
+            displayCarts();
+        });
+        function replaceSpacesWithHyphensAndLowercase(inputString) {
+            // Remove text within parentheses and the parentheses themselves
+            const stringWithoutParentheses = inputString.replace(/\([^)]*\)/g, '');
+            
+            // Replace spaces with hyphens using a regular expression
+            const stringWithHyphens = stringWithoutParentheses.replace(/\s+/g, '-');
+            
+            // Transform the string to lowercase
+            const lowercaseString = stringWithHyphens.toLowerCase();
+            
+            return lowercaseString;
+        }
+
+
+
+        function displayCarts()
+        {
+            //const carts = JSON.parse(sessionStorage.getItem('carts')) || {};
+            const carts = JSON.parse(sessionStorage.getItem(cart_session_key)) || {};
+            for (const deliveryArea in carts) {
+                if (carts.hasOwnProperty(deliveryArea)) {
+                    if(carts[deliveryArea].length==0)
+                    {
+                        delete carts[deliveryArea];
+                    }
+                }
+            }
+            
+            const cartList = $('#cart-list');
+
+            for (const deliveryArea in carts) {
+                if (carts.hasOwnProperty(deliveryArea)) {
+                    // Create a div for the heading
+                    var headingId = 'heading-'+ replaceSpacesWithHyphensAndLowercase(deliveryArea)
+                    const headingDiv = $('<div>').addClass('cart-heading').append($('<h2>').attr('id', headingId).text(deliveryArea));
+
+                    // Create a div for the cart content
+                    const cartContentDiv = $('<div>').addClass('cart-content').hide(); // Hide initially
+                    const cartItems = updateCartDisplay(carts[deliveryArea], deliveryArea);
+                    cartContentDiv.append(cartItems);
+
+                    // Append the heading and cart content to the cart list
+                    cartList.append(headingDiv);
+                    cartList.append(cartContentDiv);
+
+                    // Add a click event to the heading to toggle the cart content
+                    headingDiv.click(function () {
+                        headingDiv.toggleClass('active');
+                        cartContentDiv.slideToggle();
+                    });
+                }
+            }
+
+        }
+
+        
+        function creatCartSidebar(deliveryArea)
+        {
+            var sideBar = $('<div>').attr('id', 'cart-sidebar').addClass('cart-sidebar');
+                var header =$('<h2>').text('Summary');
+                var subTotal =$('<div>').addClass('flex').append($('<p>').text('Subtotal')).append($('<p>').attr('id', 'cart-total-'+replaceSpacesWithHyphensAndLowercase(deliveryArea)));
+                var shipping =$('<div>').addClass('flex').append($('<p>').text('Estimated Shipping & Handling')).append($('<p>').attr('id', 'cart-total-dc-'+replaceSpacesWithHyphensAndLowercase(deliveryArea)));
+                var tax =$('<div>').addClass('flex').append($('<p>').text('Estimated Tax')).append($('<p>').text('--'));
+                var netTotal =$('<div>').addClass('flex net-total').append($('<p>').text('Total')).append($('<p>').attr('id', 'net-total-'+replaceSpacesWithHyphensAndLowercase(deliveryArea)));
+                var checkoutDiv = $('<div>').addClass('checkout-button-div');
+                    smallDAID = replaceSpacesWithHyphensAndLowercase(deliveryArea)
+                    var chekoutBtnId = 'checkout-' + smallDAID;
+                    var checkoutButton =$('<button>').attr('id', chekoutBtnId).attr('data-cart-name', smallDAID).addClass('checkout-button').text('Checkout');
+                    checkoutDiv.append(checkoutButton);
+                var emptyCartDiv = $('<div>')
+                    const ecb = 'empty-cart-button-'+replaceSpacesWithHyphensAndLowercase(deliveryArea);
+                    var emptyCartButton =$('<button>').attr('id', ecb).addClass('empty-cart-button').text('Empty Cart');
+                    emptyCartDiv.append(emptyCartButton);
+
+                sideBar.append(header, subTotal, shipping, tax, netTotal, checkoutDiv, emptyCartDiv);
+
+                $(document).ready(function() {
+                var modal = document.getElementById("checkoutModal");
+
+                // Function to open the modal
+                function openModal(cartName) {
+                    modal.style.display = "block";
+                    console.log("cart Name from model: ", cartName);
+                    // You can use the 'cartName' here as needed
+                }
+
+                // Attach a click event listener to each checkout button
+                
+                    checkoutButton.on("click", function () {
+                        var cartName = checkoutButton.attr("data-cart-name");
+                        console.log('cartName: ', cartName);
+                        $('#guestCheckoutBtn').attr('guest-checkout-name', cartName);
+                        $('#guestCheckoutBtn').attr('guest-checkout-da', deliveryArea)
+                        openModal(cartName);
+                    });
+
+                // When the user clicks the "Checkout as Guest" button within the modal
+                guestCheckoutBtn.addEventListener("click", function () {
+                    var websiteId = 'cakemarque';
+                    var cartName = guestCheckoutBtn.getAttribute('guest-checkout-name');
+                    var checkoutUrl = "/checkout/" + websiteId + "/" + cartName;
+                    var cartFetchingDA = guestCheckoutBtn.getAttribute('guest-checkout-da');
+                    sessionStorage.setItem('currentCheckout', cartFetchingDA);
+                    window.location.href = checkoutUrl;
+                });
+
+                loginCheckoutBtn.onclick = function() {
+                    // Perform login/signup action here
+                    alert("Login/Signup selected. Redirecting to login/signup page.");
+                    // You can redirect the user to a login/signup page.
+                }
+
+                // When the user clicks the close button or outside the modal, close the modal
+                window.onclick = function(event) {
+                    if (event.target == modal) {
+                    modal.style.display = "none";
+                    }
+                }
+
+                // Handle closing the modal via the close button
+                var closeButton = modal.querySelector(".close");
+                if (closeButton) {
+                    closeButton.onclick = function() {
+                    modal.style.display = "none";
+                    }
+                }
+                });
+                return sideBar;
+        }
+            
+        // var flag = true;
+        
+        function updateCartDisplay(cart, deliveryArea) 
+        {
+            const cartDetailsId = 'cart-details-'+replaceSpacesWithHyphensAndLowercase(deliveryArea);
+            const cartDetailsDiv = $('<div>').addClass('cart-details-div');
+            const cartDetails = $('<div>').attr('id', cartDetailsId).addClass('cart-details');
+            var cartItems = $('<div>').attr('id', 'cart-items').addClass('cart-items');
+            var total = 0;
+            var totalDeliveryCharges = 0;
+            var totalProductQuantity =0;
+            $.each(cart, function(index, item) 
+            {
+                console.log("Item: ", item);
+                var productContainer =$('<div>').addClass('c-product-container');
+                var li = $('<div>').addClass('c-product-box');
+                var productImage = $('<div>').addClass('c-product-image').append($('<a>').attr('href', '/products/'+item.id).append($('<img>').attr('src', item.image)));
+                var productId = $('<div>').addClass('c-product-id').append($('<p>').text('ID: '+item.id));
+                var productName = $('<div>').addClass('c-product-name').append($('<h3>').text(item.name));
+                var productCaption = $('<div>').addClass('c-product-caption').append($('<p>').text('Caption: '+item.caption));
+                var productflavor = $('<div>').addClass('c-product-flavor').append($('<p>').text('Flavor: '+item.flavor));
+                var productSize = $('<div>').addClass('c-product-size').append($('<p>').text('Size: '+item.size +' Pounds'));                                                                       
+                var productPrice = $('<div>').addClass('c-product-price').append($('<h3>').text('Price')).append($('<p>').text(item.price +' Rs'));
+                var productNote = $('<div>').addClass('c-product-note').append($('<p>').text('Note: '+item.note));
+                var productInfo = $('<div>').addClass('c-product-info');
+                productInfo.append(productName, productCaption, productflavor, productSize, productNote, productId);
+                var myid = "quantity-input"+index;
+                var quantityInput = $('<div>').addClass('quantity-input').attr('type', 'number').attr('id', myid).attr('min',1).text(item.productQuantity);
+                var decrementButton = $('<button>').addClass('size-button quantity-decrement').attr('id','quantity-decrement'+index).text('-');
+                var incrementButton = $('<button>').addClass('size-button quantity-increment').attr('id','quantity-increment'+index).text('+');
+                var productQuantity = $('<div>').addClass('c-product-quantity').append($('<h3>').text('Quantity')).append(quantityInput);
+                li.append(productImage,productInfo, productQuantity, productPrice);
+                productContainer.append(li);
+                const deleteButton = $('<button>').addClass('c-delete-item-button').text('Delete');
+                    deleteButton.click(function() 
+                    {
+                        cart.splice(index, 1);
+                        //carts = JSON.parse(sessionStorage.getItem('carts')) || {};
+                        const carts = JSON.parse(sessionStorage.getItem(cart_session_key)) || {};
+                        carts[deliveryArea]=cart;
+                        if(cart.length == 0)
+                        {
+                            delete carts[deliveryArea];
+                        }
+                        window.location.href = window.location.href;
+                        sessionStorage.setItem(cart_session_key, JSON.stringify(carts));
+                        updateCartDisplay(cart, deliveryArea);
+                        
+                    });
+
+                // Append the delete button to the list item
+                var productDeleteUpdateButtons = $('<div>');
+                productDeleteUpdateButtons.append(deleteButton);
+                productContainer.append(productDeleteUpdateButtons);
+
+                cartItems.append(productContainer);
+                cartDetails.append(cartItems);
+                
+                var itemPrice = item.price;
+                total += itemPrice;
+                totalProductQuantity += parseFloat(item.productQuantity);
+                totalDeliveryCharges = item.dc +((item.dc/2)*(totalProductQuantity-1));
+            });
+            var cartSidebar = creatCartSidebar(deliveryArea);
+            cartDetails.append(cartSidebar);
+
+            $(document).ready(function() {
+                const ecb = 'empty-cart-button-'+replaceSpacesWithHyphensAndLowercase(deliveryArea);
+                console.log("ECB: ", ecb);
+                $('#'+ecb).on('click', function() {
+                     if (confirm('Are you sure you want to empty your cart?')) {
+                        clearCart(cart, deliveryArea); // Call the clearCart function
+                        window.location.href = window.location.href;
+                     }
+                });
+            });
+            $(document).ready(function() {
+                // Your code here
+                console.log('total: ', total);
+            console.log('dc: ', totalDeliveryCharges);
+            console.log('part: ', replaceSpacesWithHyphensAndLowercase(deliveryArea));
+            
+            $('#cart-total-'+replaceSpacesWithHyphensAndLowercase(deliveryArea)).text(total);
+            $('#cart-total-dc-'+replaceSpacesWithHyphensAndLowercase(deliveryArea)).text(totalDeliveryCharges);
+            $('#net-total-'+replaceSpacesWithHyphensAndLowercase(deliveryArea)).text(total+totalDeliveryCharges);
+            });
+            
+            
+            
+            cartDetailsDiv.append(cartDetails);
+            return cartDetailsDiv;
+        }
+
+        function clearCart(cart, deliveryArea) 
+        {
+            cart = []; 
+            //const carts = JSON.parse(sessionStorage.getItem('carts'));
+            const carts = JSON.parse(sessionStorage.getItem(cart_session_key));
+            carts[deliveryArea]=cart;
+            sessionStorage.setItem(cart_session_key, JSON.stringify(carts)); 
+            alert('Your cart has been emptied.'); 
+        }
+
+    </script>
+</body>
+{%endblock%}
+

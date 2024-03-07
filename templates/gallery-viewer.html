@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gallery Viewer</title>
+    <!-- Include jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .selected {
+            border: 2px solid blue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gallery Viewer</h1>
+    <!-- Display existing images -->
+    <div id="gallery-container">
+    </div>
+    <!-- Upload new image form -->
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" name="upload_images" accept="image/*" required multiple>
+        <button type="submit">Upload Image</button>
+    </form>
+
+    <button type="submit" id="submit_selection">Submit Selection</button>
+    
+    <!-- Include JavaScript code to handle image selection and upload -->
+    <script>
+        $(document).ready(function() {
+            // Update gallery when new image is uploaded
+            $('#upload-form').submit(function(e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+                $.ajax({
+                    url: '/api/upload-images',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        // Reload gallery container with updated images
+                        $('#gallery-container').html(response.html);
+                        
+                    },
+                    cache: false,
+                    contentType: false,
+                    processData: false
+                });
+
+
+                });
+
+            
+        });
+    </script>
+    <script>
+        function updateGallery() {
+            // Fetch image paths using AJAX
+            $.ajax({
+                url: '/api/get-existing-images',  // Replace with your API endpoint URL
+                type: 'GET',
+                success: function(response) {
+                    // Clear the gallery container
+                    var galleryContainer = $('#gallery-container');
+                    galleryContainer.empty();
+    
+                    // Populate the gallery container with images
+                    response.forEach(function(imagePath) {
+                        var img = $('<img>').attr('src', imagePath).attr('alt', 'Image').attr('width', '150px');
+                        galleryContainer.append(img);
+                    });
+                },
+                error: function(error) {
+                    console.error('Error fetching image paths:', error);
+                }
+            });
+        }
+    
+        $(document).ready(function() {
+            // Update the gallery immediately and then poll for updates
+            updateGallery();
+            // setInterval(updateGallery, 5000); // Update every 5 seconds (adjust interval as needed)
+            // clearInterval(updateGallery, 1000);
+        });
+    </script>
+
+<script>
+    var selectedImages = [];  // To store selected image paths    
+    var submitButton = document.getElementById('submit_selection');
+    $(document).on('click', '#gallery-container img', function() {
+        var imagePath = $(this).attr('src');
+        if (selectedImages.includes(imagePath)) {
+            // Image is already selected, deselect it
+            var index = selectedImages.indexOf(imagePath);
+            selectedImages.splice(index, 1);
+            $(this).removeClass('selected');
+        } else {
+            // Image is not selected, select it
+            selectedImages.push(imagePath);
+            console.log(selectedImages);
+            $(this).addClass('selected');
+        }
+    });
+        
+        // Add click event listener to submit button
+        $(document).on('click', '#submit_selection', function() {
+            // Get the stored input field ID from cache
+            console.log("submit button clicked");
+            var lastClickedInputID = localStorage.getItem('lastClickedInput');
+            console.log(lastClickedInputID)
+            // Update the input field with the selected image paths
+            if (lastClickedInputID) {
+                // lastClickedInput.value = selectedImages.join(', ');  // Assign selected images as a comma-separated list
+                localStorage.setItem('selectedImagesInput', selectedImages);
+                console.log("localstorage of images: ", localStorage.getItem('selectedImagesInput'));
+                selectedImages = [];  // Clear the selected images array
+                localStorage.setItem('inputInsertionFlag', 'true');
+                // localStorage.removeItem('lastClickedInput');  // Remove stored input field ID from cache
+            }
+        });
+        
+</script>
+
+
+
+    
+</body>
+</html>

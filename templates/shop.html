@@ -1,0 +1,30 @@
+{%extends "second-layout.html"%}
+{%block content%}
+<head>
+    <title>Shop Page</title>
+    <!-- Include necessary CSS and JavaScript libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Shop Page</h1>
+    <div id="product-list">
+        <!-- Product cards will be added here -->
+    </div>
+    <script>
+        $(document).ready(function() {
+            // AJAX request to fetch product data from the server
+            $.get('/api/products', function(data) {
+                // Iterate through the product data and create product cards
+                data.forEach(function(product) {
+                    var productCard = '<div class="product-card">' +
+                        '<img src="' + product.product_image + '" alt="' + product.product_name + '">' +
+                        '<h2>' + product.product_name + '</h2>' +
+                        '<p>' + product.short_description + '</p>' +
+                        '</div>';
+                    $('#product-list').append(productCard);
+                });
+            });
+        });
+    </script>
+</body>
+{%endblock%}

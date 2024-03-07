@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make Payment</title>
+</head>
+<body>
+    Total Payable: <p id="total-payment">{{ total_payment }}</p>
+
+    <button id="pay-button">Pay Now</button>
+
+    <script>
+        const payButton = document.getElementById('pay-button');
+        const totalPayment = parseFloat(document.getElementById('total-payment').textContent);
+
+        payButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/initiate-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: totalPayment })
+                });
+
+                const data = await response.json();
+                const paymentUrl = data.payment_url;
+
+                // Redirect to paymentUrl
+                window.location.href = paymentUrl;
+            } catch (error) {
+                console.error('Payment initiation failed:', error);
+                alert('Failed to initiate payment. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

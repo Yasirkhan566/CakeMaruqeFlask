@@ -1,0 +1,358 @@
+
+    {%extends "layout.html"%}
+    {%block content%}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+    <style>
+        body
+        {
+            margin: 0;
+            font-family: sans-serif;
+        }
+        .header-carousel {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            margin-top: -166px;
+            z-index: 1;
+            top: 0;
+        }
+
+        .owl-carousel {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .item img {
+            width: 100%;
+            height: auto;
+            }
+
+        /* Mobile-only CSS */
+
+
+            .desktop-only {
+                display: none;
+            }
+            
+            
+        
+
+        /* Desktop-only CSS */
+        @media screen and (min-width: 769px) {
+            .mobile-only {
+                display: none;
+            }
+
+            .desktop-only {
+                display: block;
+            }
+
+            .category-section
+            {
+                display: flex;
+            }
+
+            
+        }
+
+        .slider-container {
+            position: relative;
+            max-width: 100%;
+            margin-bottom: 50px;
+            background: #fff8f8;
+            box-shadow: 0 0 3px 3px #e5d8d8;
+        }
+
+        .prev-button, .next-button {
+            background-color: #db0707;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            padding: 7px 15px;
+            z-index: 1;
+            border-radius: unset;
+            
+        }
+        
+        .product-image img{
+            width: 100%;
+            
+        }
+
+        .slider {
+            width: 100%; 
+            display: flex;
+            transition: transform 0.3s ease; 
+            overflow: hidden; 
+        }
+
+        .slider-item {
+            flex: 0 0 300px; 
+            padding: 10px;
+        }
+
+        .category-section-heading
+        {
+            text-align: center;
+            font-family: sans-serif;
+            font-weight: lighter;
+            font-size: 50px;
+            width: fit-content;
+            border-bottom: 3px solid red;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 20px;
+        }
+
+        .slider-item-events {
+            flex: 0 0 50px; 
+            padding: 10px;
+            
+        }
+        .slider-buttons
+        {
+            float: right;
+            margin-right: 20px;
+        }
+
+        .see-all-button
+        {
+            margin-left: 20px;
+        }
+        button
+        {
+            padding: 8px 19px;
+            font-size: 20px;
+            background: #db0707;
+            font-weight: bold;
+            color: white;
+            border: navajowhite;
+            border-radius: 50px;
+        }
+      
+    </style>
+</head>
+<body>
+
+    <header class="header-carousel">
+        <div class="owl-carousel">
+            <div class="item">
+                <img alt="Placeholder" data-mobile="{{ url_for('static', filename='images/mobile-cover1.png') }}" data-desktop="{{ url_for('static', filename='images/pc-cover1.png') }}">
+            </div>
+            <div class="item">
+                <img alt="Placeholder" data-mobile="{{ url_for('static', filename='images/mobile-cover4.jpg') }}" data-desktop="{{ url_for('static', filename='images/pc-cover4.jpg') }}">
+            </div>
+            <div class="item">
+                <img alt="Placeholder" data-mobile="{{ url_for('static', filename='images/mobile-cover2.png') }}" data-desktop="{{ url_for('static', filename='images/pc-cover2.png') }}">
+            </div>
+            <div class="item">
+                <img alt="Placeholder" data-mobile="{{ url_for('static', filename='images/mobile-cover1.png') }}" data-desktop="{{ url_for('static', filename='images/pc-cover3.png') }}">
+            </div>
+        </div>
+        <div class="header-separator"></div>
+    </header>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+
+    
+    <script>
+        $(document).ready(function(){
+            $(".owl-carousel").owlCarousel({
+                items: 1,
+                loop: true,
+                autoplay: true,
+                autoplayTimeout: 5000, // Change slide every 2 seconds
+                animateOut: 'fadeOut', // Set the fade-out animation
+                animateIn: 'fadeIn',   // Set the fade-in animation
+                onInitialized: initializeImages
+            });
+        });
+
+        function initializeImages(event) {
+            // Get the current image and determine whether it's mobile or desktop
+            var currentItem = event.item.index;
+            var isMobile = window.innerWidth <= 768; // Adjust this breakpoint if needed
+
+            // Find all images in the carousel
+            var images = document.querySelectorAll('.item img');
+
+            // Iterate through the images and set their src attribute based on the screen size
+            images.forEach(function(image) {
+                var mobileSrc = image.getAttribute('data-mobile');
+                var desktopSrc = image.getAttribute('data-desktop');
+                image.src = isMobile ? mobileSrc : desktopSrc;
+            });
+
+            // Refresh the Owl Carousel to apply changes
+            $('.owl-carousel').trigger('refresh.owl.carousel');
+        }
+
+        // Reinitialize images when the window is resized
+        $(window).resize(function() {
+            $(".owl-carousel").trigger('to.owl.carousel', 0); // Go to the first slide
+        });
+    </script>
+
+    
+    
+    <div class="slider-container">
+        <h1 class="category-section-heading">Baby Boy Cakes</h1>
+        <a href="{{ url_for('shop_page') }}" class="see-all-button"><button>See All</button></a>
+        <div class="slider-buttons" id="slider-buttons">
+            <button class="prev-button">&#10094;</button>
+            <button class="next-button">&#10095;</button>
+        </div>
+        <div id="baby-boy-cakes" class="category-section slider"></div>
+        
+    </div>
+
+    
+    <div class="slider-container">
+        <h1 class="category-section-heading">Baby Girls Theme Cakes</h1>
+        <a href="{{ url_for('shop_page') }}" class="see-all-button"><button>See All</button></a>
+        <div class="slider-buttons" id="slider-buttons">
+            <button class="prev-button">&#10094;</button>
+            <button class="next-button">&#10095;</button>
+        </div>
+        <div id="baby-girl-cakes" class="category-section slider"></div>
+    </div>
+    
+    
+    <div class="slider-container">
+        <h1 class="category-section-heading">Girls Theme Cakes</h1>
+        <a href="{{ url_for('shop_page') }}" class="see-all-button"><button>See All</button></a>
+        <div class="slider-buttons">
+            <button class="prev-button" id="slider-buttons">&#10094;</button>
+            <button class="next-button">&#10095;</button>
+        </div>
+        <div id="girls-theme-cakes" class="category-section slider"></div>
+      
+    </div>
+    
+    <div class="slider-container">
+        <h1 class="category-section-heading">Boys theme cakes</h1>
+        <a href="{{ url_for('shop_page') }}" class="see-all-button"><button>See All</button></a>
+        <div class="slider-buttons" id="slider-buttons">
+            <button class="prev-button">&#10094;</button>
+            <button class="next-button">&#10095;</button>
+        </div>
+        <div id="boys-theme-cakes" class="category-section slider"></div>
+      
+    </div>
+    
+
+    <script>
+        $(document).ready(function() {
+            // Fetch and populate the products for each category using AJAX
+            function fetchAndPopulateProducts(categoryId) {
+                $.get('/api/get_latest_products/' + categoryId, function(data) {
+                    var categorySection = $('#' + categoryId);
+                    var latestProducts = data.latest_products;
+                    
+                    latestProducts.forEach(function(product) {
+                        var productBox = $('<div>').addClass('product-box slider-item');
+                        var productImage = $('<div>').addClass('product-image').append($('<a>').attr('href', '/products/'+product.id).append($('<img>').attr('src', product.image)));
+                        var productName = $('<h2>').addClass('product-name').text(product.name);
+                        var productPrice = $('<p>').addClass('product-price').text('Price: Rs ' + product.price.toFixed(2));
+                        var productRating = $('<p>').addClass('product-rating').text('Rating: ' + product.rating.toFixed(1));
+                        var chooseOption = $('<p>').addClass('choose-option').append($('<button>').text('Choose Option'));
+                        productBox.append(productImage, productName, productPrice, productRating, chooseOption);
+            
+                        categorySection.append(productBox);
+                    });
+                });
+
+                
+            }
+            
+            // Fetch and populate products for each category
+
+            fetchAndPopulateProducts('baby-boy-cakes');
+            fetchAndPopulateProducts('baby-girl-cakes');
+            fetchAndPopulateProducts('girls-theme-cakes');
+            fetchAndPopulateProducts('boys-theme-cakes');
+        });
+    </script>
+
+
+    <script>
+        //Product slider script
+
+        $(document).ready(function() {
+    // Configuration
+    var autoSlideInterval = 3000; // Auto slide interval in milliseconds
+    var slideDuration = 500; // Slide duration in milliseconds
+    var slideWidth = 320; // Width of each slider item (adjust to your design)
+
+    // Elements
+    var slider = $('.slider');
+    var prevButton = $('.prev-button');
+    var nextButton = $('.next-button');
+
+    // Auto slide function
+    function autoSlide() {
+        var firstItem = slider.find('.slider-item:first');
+        firstItem.animate({ marginLeft: -slideWidth }, slideDuration, function() {
+            firstItem.appendTo(slider).css('margin-left', 0);
+        });
+    }
+
+
+    // Manual slide functions
+    function slideLeft() {
+        console.log("slide left called");
+        var lastItem = slider.find('.slider-item:last');
+        lastItem.prependTo(slider).css('margin-left', -slideWidth);
+        lastItem.animate({ marginLeft: 0 }, slideDuration);
+    }
+
+    function slideRight() {
+        console.log("slide right called");
+        var firstItem = slider.find('.slider-item:first');
+        firstItem.animate({ marginLeft: -slideWidth }, slideDuration, function() {
+            firstItem.appendTo(slider).css('margin-left', 10);
+        });
+    }
+
+    // Event delegation for prev and next buttons
+    sliderButtons = document.getElementById('slider-buttons')
+    slider.on('click', '.prev-button', function() {
+        console.log("previous button clicked");
+        slideLeft();
+    });
+
+    slider.on('click', '.next-button', function() {
+        console.log("next button cllicked");
+        slideRight();
+    });
+
+    // Auto slide
+    var autoSlideIntervalId = setInterval(autoSlide, autoSlideInterval);
+    
+
+    // Pause auto slide on hover
+    slider.hover(function() {
+        clearInterval(autoSlideIntervalId);
+        
+    }, function() {
+        autoSlideIntervalId = setInterval(autoSlide, autoSlideInterval);
+        
+    });
+});
+
+
+    </script>
+
+
+</body>
+{%endblock%}
+

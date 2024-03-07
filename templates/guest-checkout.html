@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Add your CSS and JavaScript links here -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body
+        {
+            font-family: sans-serif;
+        }
+        .image-cell
+        {
+            width: 100px;
+        }
+        .image-cell img
+        {
+            width: 100%;
+        }
+        .items-table
+        {
+            border-collapse: collapse;
+            box-shadow: 0 0 3px 3px red;
+            background-color: gold;;
+        }
+        .items-table tr
+        {
+            border-bottom: 1px solid red;
+        }
+        .items-table tr th, .items-table tr td
+        {
+            padding: 5px 20px;
+        }
+        .items-table .last-row th, .items-table .second-last-row th
+        {
+            padding: 20px;
+        }
+        .items-table .last-row
+        {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <h2>Guest Checkout</h2>
+        {{website_id}}
+        {{cart_name}}
+        <form id="checkout-form" method="post" action="/checkout/{{ website_id }}/{{ cart_name }}">
+            <!-- Common Fields -->
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required autocomplete="name">
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required autocomplete="email">
+
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" name="phone" required autocomplete="phone">
+
+            <input type="hidden" id="total-payment", name="total-payment">
+            <!-- Delivery Options -->
+            <label for="delivery-option">Select an option:</label>
+            <select id="delivery-option" name="delivery-option">
+                <option value="home-delivery">Home Delivery</option>
+                <option value="self-pickup">Self Pickup</option>
+                <option value="send-gift">Send as a Gift</option>
+            </select>
+
+            <!-- Form Sections (Home Delivery, Self Pickup, Send Gift) -->
+            <div class="form-section" id="home-delivery-section">
+                <!-- Home Delivery Fields -->
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" required autocomplete="address-line1">
+
+                <label for="delivery-date">Delivery Date:</label>
+                <input type="date" id="delivery-date" name="delivery-date" required>
+
+                <label for="delivery-time">Delivery Time:</label>
+                <input type="time" id="delivery-time" name="delivery-time" required>
+            </div>
+
+            <div class="form-section" id="self-pickup-section">
+                <!-- Self Pickup Fields -->
+                <label for="pickup-date">Pickup Date:</label>
+                <input type="date" id="pickup-date" name="pickup-date" required>
+
+                <label for="pickup-time">Pickup Time:</label>
+                <input type="time" id="pickup-time" name="pickup-time" required>
+            </div>
+
+            <div class="form-section" id="send-gift-section">
+                <!-- Sender Info -->
+                <h3>Sender Information</h3>
+                <label for="sender-name">Sender Name:</label>
+                <input type="text" id="sender-name" name="sender-name" required>
+
+                <label for="sender-email">Sender Email:</label>
+                <input type="email" id="sender-email" name="sender-email" required>
+
+                <label for="sender-phone">Sender Phone Number:</label>
+                <input type="tel" id="sender-phone" name="sender-phone" required>
+
+                <!-- Receiver Info -->
+                <h3>Receiver Information</h3>
+                <label for="receiver-name">Receiver Name:</label>
+                <input type="text" id="receiver-name" name="receiver-name" required>
+
+                <label for="receiver-phone">Receiver Phone Number:</label>
+                <input type="tel" id="receiver-phone" name="receiver-phone" required>
+
+                <label for="receiver-email">Receiver Email:</label>
+                <input type="email" id="receiver-email" name="receiver-email" required>
+                
+                <label for="receiver-address">Receiver Address:</label>
+                <input type="text" id="receiver-address" name="receiver-address" required>
+            </div>
+
+            <!-- Next Button -->
+            <input type="submit" value="submit">
+        </form>
+    </div>
+
+    <div class="order-summary">
+        <h2>Order Summary</h2>
+        <div class="order-summary-details" id="order-summary-details">
+
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            const deliveryArea = sessionStorage.getItem('currentCheckout');
+            const deliveryOption = $("#delivery-option");
+            const homeDeliveryFields = $("#home-delivery-section input[type='text'], #home-delivery-section input[type='date'], #home-delivery-section input[type='time']");
+            const selfPickupFields = $("#self-pickup-section input[type='text'], #self-pickup-section input[type='date'], #self-pickup-section input[type='time']");
+            const sendGiftFields = $("#send-gift-section input[type='text'], #send-gift-section input[type='date'], #send-gift-section input[type='time'], #send-gift-section input[type='tel'], #send-gift-section input[type='email']");
+            const homeDeliverySection = $("#home-delivery-section");
+            const selfPickupSection = $("#self-pickup-section");
+            const sendGiftSection = $("#send-gift-section");
+            // Function to toggle 'required' attribute based on delivery option
+            function toggleRequiredFields(selectedOption) {
+                // Remove 'required' from all fields
+                homeDeliveryFields.removeAttr("required");
+                selfPickupFields.removeAttr("required");
+                sendGiftFields.removeAttr("required");
+    
+                // Add 'required' to fields based on the selected option
+                if (selectedOption === "home-delivery") {
+                    homeDeliveryFields.attr("required", "required");
+                } else if (selectedOption === "self-pickup") {
+                    selfPickupFields.attr("required", "required");
+                } else if (selectedOption === "send-gift") {
+                    sendGiftFields.attr("required", "required");
+                }
+            }
+
+            function toggleFormSections() {
+                homeDeliverySection.hide();
+                selfPickupSection.hide();
+                sendGiftSection.hide();
+
+                const selectedOption = deliveryOption.val();
+                if (selectedOption === "home-delivery") {
+                    homeDeliverySection.show();
+                } else if (selectedOption === "self-pickup") {
+                    selfPickupSection.show();
+                } else if (selectedOption === "send-gift") {
+                    sendGiftSection.show();
+                }
+
+                // Call the function to toggle 'required' attribute
+                toggleRequiredFields(deliveryOption.val());
+            }
+
+            // Initial toggle
+            toggleFormSections();
+    
+            
+            // Event listener for the delivery option select
+            deliveryOption.change(function () {
+                const selectedOption = $(this).val();
+                toggleFormSections();
+            });
+        });
+        function createElementFromDictionary(cart) {
+    const itemstable = $('<table>').addClass('items-table').append(
+        $('<tr>').append(
+            $('<th>').text('Picture'),
+            $('<th>').text('Details'),
+            $('<th>').text('QTY'),
+            $('<th>').text('Price')
+        )
+    );
+    var totalc = 0;
+    var totalProductQuantity = 0;
+    for (const itemKey in cart) {
+        if (cart.hasOwnProperty(itemKey)) {
+            const item = cart[itemKey];
+
+            const itemRow = $('<tr>');
+            const imageCell = $('<td>').addClass('image-cell').append($('<img>').attr('src', item.image));
+            const detailsCell = $('<td>').append(
+                $('<h4>').text(item.name),
+                $('<div>').text(`${item.size} pound ${item.flavor}`)
+            );
+            const qtyCell = $('<td>').text(item.productQuantity);
+            const priceCell = $('<td>').text(item.price);
+
+            itemRow.append(imageCell, detailsCell, qtyCell, priceCell);
+            itemstable.append(itemRow);
+            totalProductQuantity += parseFloat(item.productQuantity);
+            console.log('item price: ', item.price);
+            totalc = totalc + item.price;
+            console.log("total charges: ", totalc);
+        }
+
+        var totalDeliveryCharges = 0; 
+        let isFirstItem = true; 
+
+        for (const itemKey in cart) {
+            if (cart.hasOwnProperty(itemKey)) {
+                const item = cart[itemKey];
+                const itemCharges = isFirstItem ? item.dc : (item.dc / 2);
+                totalDeliveryCharges += itemCharges;
+                if (isFirstItem) {
+                    isFirstItem = false;
+                }
+            }
+        }
+
+        
+        console.log("dc: ", totalDeliveryCharges);
+        
+         
+    }
+    totalc+= totalDeliveryCharges;
+    itemstable.append(
+        $('<tr>').addClass('second-last-row').append(
+            $('<th>').text(''),
+            $('<th>').text('Total Delivery Charges'),
+            $('<th>').text(''),
+            $('<th>').text(totalDeliveryCharges)
+        )
+    );
+    itemstable.append(
+        $('<tr>').addClass('last-row').append(
+            $('<th>').text('Total'),
+            $('<th>').text(''),
+            $('<th>').text(''),
+            $('<th>').text(totalc)
+        )
+    );
+
+    var totalPayment = $("#total-payment");
+    totalPayment.val(totalc);
+    return itemstable;
+}
+
+        
+
+    </script>
+
+    <script>
+        const deliveryArea = sessionStorage.getItem('currentCheckout');
+        var website_id = 'cakemarque';
+        const cart_session_key = `carts_${website_id}`;
+        const carts = JSON.parse(sessionStorage.getItem(cart_session_key))
+        const cart = carts[deliveryArea];
+        console.log('cart: ', cart);
+        const summary = createElementFromDictionary(cart);
+        $('#order-summary-details').append(summary);
+
+
+        $('#checkout-form').submit(function() {
+            $.ajax({
+                type: "POST",
+                url: "/checkout-items/{{ website_id }}/{{ cart_name }}",
+                data: JSON.stringify({ cart: cart }),  // Wrap the cart array in an object
+                contentType: "application/json",
+                dataType: "json",
+                success: function(response) {
+                    if (response.redirect) {
+                        window.location.href = response.redirect;}
+                    sessionStorage.removeItem(cart_session_key);
+                },
+                error: function(xhr, status, error) {
+                    alert("Failed to send data towards serverside " + xhr.responseText);
+                }
+            });
+        });
+
+    </script>
+    
+</body>
+</html>

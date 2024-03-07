@@ -1,0 +1,247 @@
+{%extends "second-layout.html"%}
+{%block content%}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Register</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body
+        {
+            font-family: sans-serif;
+        }
+        .form {
+            font-family: Arial, sans-serif;
+            margin: auto;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 57vh;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 300px;
+            margin-top: 100px;
+        }
+
+        .form-container {
+            padding: 20px;
+        }
+
+        .form-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .form-toggle button {
+            border: none;
+            background-color: transparent;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            color: #777;
+        }
+
+        .form-toggle button.active {
+            color: #333;
+            border-bottom: 2px solid #333;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group input {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .form-group button {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .form-group button:hover {
+            background-color: #555;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container form">
+        <div class="form-container">
+            <div class="form-toggle">
+                <button id="login-toggle" class="active">Login</button>
+                <button id="register-toggle">Register</button>
+            </div>
+            <form class="form-group" id="login-form">
+                <h2>Login</h2>
+                <input type="text" placeholder="Username" name="username">
+                <input type="password" placeholder="Password" name="password">
+                <button>Login</button>
+            </form>
+            <form class="form-group hidden" id="register-form">
+                <h2>Register</h2>
+                <input type="text" placeholder="Username" name="username">
+                <input type="email" placeholder="Email" name = "email">
+                <input type="password" placeholder="Password" name="password">
+                <button>Register</button>
+            </form>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <script>
+                alert("{{ messages[0] }}");
+            </script>
+        {% endif %}
+    {% endwith %}
+
+
+    <script>
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+    </script>
+
+    <script>
+        const loginForm = document.getElementById('login-form');
+const registerForm = document.getElementById('register-form');
+const loginToggle = document.getElementById('login-toggle');
+const registerToggle = document.getElementById('register-toggle');
+
+loginToggle.addEventListener('click', () => {
+    loginForm.classList.remove('hidden');
+    registerForm.classList.add('hidden');
+    loginToggle.classList.add('active');
+    registerToggle.classList.remove('active');
+});
+
+registerToggle.addEventListener('click', () => {
+    loginForm.classList.add('hidden');
+    registerForm.classList.remove('hidden');
+    loginToggle.classList.remove('active');
+    registerToggle.classList.add('active');
+});
+
+    </script>
+
+    <!-- Add this code inside the <script> tag in your HTML -->
+<script>
+    // Handle Login form submission
+    $("#login-form").submit(function (e) {
+        e.preventDefault();
+        var formData = {};
+
+    // Loop through each input field and add its value to the formData object
+        $(this).find('input').each(function () {
+            var fieldName = $(this).attr('name');
+            var fieldValue = $(this).val();
+            formData[fieldName] = fieldValue;
+        });
+
+        console.log(formData)
+        // Make an AJAX request to post login data to the server
+        $.ajax({
+            type: "POST",
+            url: "/api/login",
+            data: JSON.stringify(formData),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (response) {
+                // Handle success response
+                console.log(response);
+                alert(response.message);
+                if (response.redirect) {
+                window.location.href = response.redirect;
+            }
+
+            },
+            error: function (xhr, status, error) {
+                // Handle error response
+                alert("Login Failed" + xhr.responseText);
+            }
+        });
+
+        });
+
+        // Handle Registration form submission
+        $("#register-form").submit(function (e) {
+        e.preventDefault();
+        var formData = {};
+
+        // Loop through each input field and add its value to the formData object
+        $(this).find('input').each(function () {
+            var fieldName = $(this).attr('name');
+            var fieldValue = $(this).val();
+            formData[fieldName] = fieldValue;
+        });
+
+        console.log(formData)
+
+        // Make an AJAX request to post registration data to the server
+        // $.ajax({
+        //         type: "POST",
+        //         url: "/api/register",
+        //         data: JSON.stringify(formData),
+        //         contentType: "application/json",
+        //         dataType: "json",
+        //         success: function (response) {
+        //             alert(response.message);
+        //             if (response.redirect) {
+        //                 window.location.href = response.redirect;
+        //             } else if (response.verification_link) {
+        //                 alert("Registration successful. Please check your email for verification link.");
+        //             }
+        //         },
+        //         error: function (xhr, status, error) {
+        //             alert("Registration Failed: " + xhr.responseText);
+        //         }
+        //     });
+
+        $.ajax({
+            type: "POST",
+            url: "/api/register",
+            data: JSON.stringify(formData),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (response) {
+                alert(response.message);
+                if (response.redirect) {
+                    window.location.href = response.redirect;
+                } else if (response.verification_link) {
+                    alert("Registration successful. Please check your email for verification link.");
+                }
+            },
+            error: function (xhr, status, error) {
+                alert("Registration Failed: " + xhr.responseText);
+            }
+        });
+
+    });
+</script>
+
+</body>
+{%endblock%}

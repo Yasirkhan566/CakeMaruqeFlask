@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Register</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="container">
+            <form class="" id="verification-form">
+                <h2>Verify Your Profile</h2>
+                <input type="email" placeholder="Email" name="email" id="email">
+                <button>Send Verification Link</button>
+            </form>
+    </div>
+    <script>
+        const verificationForm = document.getElementById('verification-form');
+    </script>
+
+    <!-- Add this code inside the <script> tag in your HTML -->
+<script>
+    // Handle Login form submission
+    $("#verification-form").submit(function (e) {
+        e.preventDefault();
+        var formData = {
+            email: $("#email").val()
+        };
+
+        // Make an AJAX request to post login data to the server
+        $.ajax({
+            type: "POST",
+            url: "/api/verify-email",
+            data: JSON.stringify(formData),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (response) {
+                // Handle success response
+                console.log(response);
+                alert(response.message);
+                if (response.redirect) {
+                window.location.href = response.redirect;
+            }
+
+            },
+            error: function (xhr, status, error) {
+                // Handle error response
+                alert("Verification Failed" + xhr.responseText);
+                window.location.href = url_for('register');
+            }
+        });
+        });
+
+</script>
+
+</body>
+</html>

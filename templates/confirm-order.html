@@ -1,0 +1,77 @@
+{%extends "second-layout.html"%}
+{%block content%}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://js.stripe.com/v3/"></script>
+    <title>Document</title>
+    <style>
+        body
+        {
+            font-family: sans-serif;
+        }
+        h3, p
+        {
+            margin: 4px;
+        }
+        .flex
+        {
+            display: flex;
+            align-items: center;
+        }
+        .account-details
+        {
+            width: 300px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-top: 2px solid #cf3721;
+            border-radius: 10px;
+            margin: 20px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .qr-pay img
+        {
+            width: 100%;
+        }
+        .message
+        {
+            width: 70%;
+            margin: 20px auto;
+            line-height: 25px;
+            text-align: center;
+            color: #b90404;
+            font-weight: bold;
+
+        }
+        .order-placed-message
+        {
+            margin-top: 100px;
+            text-align: center;
+            color: #e50a0a
+        }
+    </style>
+</head>
+<body>
+    <div class="order-placed-message">
+        <h2>Order Placed Successfully</h2>
+        <div class="message">{{message}}</div>
+        <div class="account-details">
+            <h2>Account Details</h2>
+            <div class="flex">
+                <h3>Account Number: </h3>
+                <p>06047902262903</p>
+            </div>
+            <div class="flex">
+                <h3>Holder Name:</h3>
+                <p>YASIR KHAN</p>
+            </div>
+            <div class="qr-pay">
+                <img src="{{ url_for('static', filename='images/qr-pay.jpeg') }}">
+            </div>
+        </div>
+
+        <p class="message"><b>Note: Over Sease Pakistanis Contact Us on WhatsApp for Payment Process</p>
+    </div>
+</body>
+{%endblock%}

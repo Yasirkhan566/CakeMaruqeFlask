@@ -1,0 +1,254 @@
+<!-- cart.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Include necessary CSS and JavaScript files -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body
+        {
+            font-family: sans-serif;
+        }
+        .c-product-container
+        {
+            width: 75%;
+            padding: 30px;
+            background: ghostwhite;
+            box-shadow: 0 0 3px 3px #efefef;
+            margin-bottom: 20px;
+        }
+        .c-product-box
+        {
+            display: flex;
+            column-gap: 20px;
+            
+        }
+        .c-product-image
+        {
+            flex-basis: 200px;
+        }
+        .c-product-image a img
+        {
+            width: 100%;
+        }
+        .c-delete-item-button
+        {
+            height: fit-content;
+            padding: 5px 10px;
+        }
+        .c-product-name h3
+        {
+            margin: 0;
+        }
+        .c-product-price p
+        {
+            margin: 0;
+        }
+        .c-product-info
+        {
+            width: 40%;
+        }
+        .c-product-quantity
+        {
+            width: 20%;
+            text-align: center;
+        }
+        .c-product-price
+        {
+            width: 20%;
+            text-align: right;
+        }
+        .c-product-price h3, .c-product-quantity h3
+        {
+            margin: 0;
+            margin-bottom: 20px;
+        }
+        .c-product-quantity input
+        {
+            width: 40px;
+            border: 1px solid red;
+            padding: 5px 15px;
+            border-radius: 50px;
+            margin: 0 10px;
+        }
+        .size-button
+        {
+            padding: 5px 10px;
+            border-radius: 50px;
+            border: 2px solid burlywood;
+        }
+        .cart-main
+        {
+            display: flex;
+        }
+        .cart-sidebar
+        {
+            width: 25%;
+        }
+
+    </style>
+</head>
+
+<body>
+    <h2>Your Cart</h2>
+    <div class="cart-main">
+        <div id="cart-items">
+            
+        </div>
+        <div class="cart-sidebar" id="cart-sidebar">
+
+        </div>
+    </div>
+    <p>Total: <span id="cart-total">0</span></p>
+    <p>Total DC: <span id="cart-total-dc">0</span></p>
+
+    <button id="checkout-button">Proceed to Checkout</button>
+    <button id="empty-cart-button">Empty Cart</button>
+    <!-- Include the JavaScript code for handling the cart (similar to previous example) -->
+
+    
+    <script>
+        $(document).ready(function() {
+            // Retrieve cart items from session storage
+            const cart = JSON.parse(sessionStorage.getItem('cart')) || [];
+    
+            // Function to update the cart display
+            function updateCartDisplay() {
+                const cartItems = $('#cart-items');
+                const cartTotal = $('#cart-total');
+                const cartTotalDC = $('#cart-total-dc');
+                cartItems.empty();
+                var total = 0;
+                var totalDeliveryCharges = 0;
+                $.each(cart, function(index, item) {
+                    var productContainer =$('<div>').addClass('c-product-container');
+                    var li = $('<div>').addClass('c-product-box');
+                    var productImage = $('<div>').addClass('c-product-image').append($('<a>').attr('href', '/products/'+item.id).append($('<img>').attr('src', item.image)));
+                    var productId = $('<div>').addClass('c-product-id').append($('<p>').text('ID: '+item.id));
+                    var productName = $('<div>').addClass('c-product-name').append($('<h3>').text(item.name));
+                    var productCaption = $('<div>').addClass('c-product-caption').append($('<p>').text('Caption: '+item.caption));
+                    var productflavor = $('<div>').addClass('c-product-flavor').append($('<p>').text('Flavor: '+item.flavor));
+                    var productSize = $('<div>').addClass('c-product-size').append($('<p>').text('Size: '+item.size +' Pounds'));                                                                       
+                    var productPrice = $('<div>').addClass('c-product-price').append($('<h3>').text('Price')).append($('<p>').text(item.price +' Rs'));
+                    var productNote = $('<div>').addClass('c-product-note').append($('<p>').text('Note: '+item.note));
+
+                    var productInfo = $('<div>').addClass('c-product-info');
+                        productInfo.append(productName, productCaption, productflavor, productSize, productNote, productId);
+                    console.log("Index: ", index);
+                    var myid = "quantity-input"+index;
+                    console.log("myid: ", myid);
+                    var quantityInput = $('<input>').addClass('quantity-input').attr('type', 'number').attr('id', myid).attr('min',1).val(1);
+                    console.log('Id: ', quantityInput.attr('id'));
+                    var decrementButton = $('<button>').addClass('size-button quantity-decrement').attr('id','quantity-decrement'+index).text('-');
+                    var incrementButton = $('<button>').addClass('size-button quantity-increment').attr('id','quantity-increment'+index).text('+');
+                    var productQuantity = $('<div>').addClass('c-product-quantity').append($('<h3>').text('Quantity')).append(decrementButton, quantityInput, incrementButton);
+                    
+                    li.append(productImage,productInfo, productQuantity, productPrice);
+                    productContainer.append(li);
+
+                    // Create a delete button for each item
+                    const deleteButton = $('<button>').addClass('c-delete-item-button').text('Delete');
+                    deleteButton.click(function() {
+                        // Remove the item from the cart array
+                        cart.splice(index, 1);
+                        // Update session storage with the modified cart
+                        sessionStorage.setItem('cart', JSON.stringify(cart));
+                        // Update the cart display
+                        updateCartDisplay();
+                    });
+    
+                    // Append the delete button to the list item
+                    var productDeleteUpdateButtons = $('<div>');
+                    productDeleteUpdateButtons.append(deleteButton);
+                    productContainer.append(productDeleteUpdateButtons);
+    
+                    cartItems.append(productContainer);
+                    total += item.price;
+                    console.log('items dc: ', item.dc);
+                    console.log("Type of DC: ",typeof(item.dc));
+                    totalDeliveryCharges = item.dc +((item.dc/2)*cart.length);
+                });
+    
+                cartTotal.text(total);
+                cartTotalDC.text(totalDeliveryCharges);
+            }
+    
+            // Initial cart display
+            updateCartDisplay();
+    
+            // Event listener for the "Proceed to Checkout" button
+            $('#checkout-button').click(function() {
+                // Implement the checkout process, which can include login/signup
+                // Redirect the user to the checkout page or perform any other desired action
+                alert('Implement the checkout process here.');
+            });
+        });
+    </script>
+    
+
+
+<script>
+    // Function to clear the cart
+    function clearCart() {
+        cart = []; // Clear the cart array
+        sessionStorage.setItem('cart', JSON.stringify(cart)); // Update session storage
+        alert('Your cart has been emptied.'); // Provide feedback to the user
+    }
+
+    // Add event listener for the "Empty Cart" button
+    $(document).ready(function() {
+        $('#empty-cart-button').on('click', function() {
+            if (confirm('Are you sure you want to empty your cart?')) {
+                clearCart(); // Call the clearCart function
+            }
+        });
+
+        // Other JavaScript code for your cart page
+        // ...
+    });
+
+
+    
+    $(document).ready(function() {
+
+        document.querySelectorAll('button').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Get the ID of the clicked button
+            var buttonId = this.id;
+            const buttonIdWithoutLastElement = buttonId.slice(0, -1);
+            if(buttonIdWithoutLastElement == 'quantity-increment')
+            {
+                const lastElement = buttonId.charAt(buttonId.length - 1);
+                var inputId = "quantity-input" + lastElement;
+                var currentSize = parseFloat($("#" + inputId).val());
+                var newSize = currentSize + 1;
+                $("#" + inputId).val(newSize);
+                $("#" + inputId).trigger("input");
+            }
+            if(buttonIdWithoutLastElement == 'quantity-decrement')
+            {
+                const lastElement = buttonId.charAt(buttonId.length - 1);
+                var inputId = "quantity-input" + lastElement;
+                var currentSize = parseFloat($("#" + inputId).val());
+                var minSize = parseFloat($("#" + inputId).attr("min"));
+                if (currentSize > minSize) {
+                    var newSize = currentSize - 1;
+                    $("#" + inputId).val(newSize);
+                    $("#" + inputId).trigger("input");
+                }
+            }
+        });
+    });
+});
+
+            
+        
+
+
+</script>
+
+
+
+</body>
+</html>

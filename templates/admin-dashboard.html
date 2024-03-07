@@ -1,0 +1,603 @@
+<!-- admin-dashboard.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Admin Dashboard</title>
+    <style>
+        /* admin-dashboard.css */
+        #sidebar {
+            width: 200px;
+            background-color: #333;
+            padding: 15px;
+            position: fixed;
+            height: 100%;
+        }
+
+        /* Add other styles for the admin dashboard content */
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .popup-content {
+            background-color: #fff;
+            padding: 20px;
+            width: 80%;
+            margin: 100px auto;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .product-item
+        {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+
+        }
+        .product-item img
+        {
+            width: 100px;
+        }
+        #product-list
+        {
+            max-height: 400px;
+            overflow: auto;
+        }
+        .icon-size
+        {
+            width: 100px;
+        }
+        .hidden-gallery
+        {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Welcome to Admin Dashboard</h1>
+    <a href="{{ url_for('insert_product') }}">Add New Products</a>
+    <div id="sidebar">
+        <button id="show-products">Products</button>
+        <button id="show-flavors">Flavors</button>
+        <button id="show-shipping">Shipping Areas</button>
+        <!-- Add other sidebar options here -->
+    </div>
+
+    <!-- Add other content of the admin dashboard here -->
+
+    <div id="products-popup" class="popup">
+        <div class="popup-content">
+            <span class="close" id="close-popup">&times;</span>
+            <h2>Product List</h2>
+            <div id="product-list"></div>
+        </div>
+        
+    </div>
+
+    <div id="product-edit-popup" class="popup">
+        <div class="popup-content">
+            <span class="close" id="close-product-edit-popup">&times;</span>
+            <h2>Product</h2>
+            <div id="product-to-edit"></div>
+        </div>
+        
+    </div>
+
+
+    <div class="popup gallery-viewer" id="gallery-viewer">
+        <div id="gallery-container" class="popup-content">
+        </div>
+        <!-- Upload new image form -->
+        <form id="upload-form" enctype="multipart/form-data">
+            <input type="file" name="upload_images" accept="image/*" required multiple>
+            <button type="submit">Upload Image</button>
+        </form>
+    
+        <button type="submit" id="submit_selection">Submit Selection</button>
+        <button type="" id="close-gallery-viewer-button">Close Window</button>
+    </div>
+
+    <div class="popup flavors-popup" id="flavors-popup">
+        <div id="flavors-container" class="popup-content">
+            <span class="close" id="close-flavors-popup">&times;</span>
+            <div id="flavors-list"></div>
+            <button class="insert-flavor-btn" id="insert-flavor-btn">Insert New Flavor</button>
+        </div>
+        <!-- Upload new flavor form -->
+        <form id="new-flavor-form" class="popup">
+            <div class="popup-content">
+                <span class="close" id="close-insert-flavors-popup">&times;</span>
+            <input type="text" name="flavor-name">
+            <input type="text" name="flavor-price">
+            <button type="submit">Insert</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="popup shipping-popup" id="shipping-popup">
+        <div id="shipping-container" class="popup-content">
+            <span class="close" id="close-shipping-popup">&times;</span>
+            <div id="shipping-list"></div>
+            <button class="insert-shipping-btn" id="insert-shipping-btn">Insert New Area</button>
+        </div>
+        <!-- Upload new flavor form -->
+        <form id="new-shipping-form" class="popup">
+            <div class="popup-content">
+                <span class="close" id="close-insert-shipping-popup">&times;</span>
+            <input type="text" name="shipping-area">
+            <input type="text" name="shipping-charges">
+            <button type="submit">Insert</button>
+            </div>
+        </form>
+    </div>
+
+
+    <script>
+        $(document).ready(function() {
+            $("#show-products").click(function() {
+                $("#products-popup").fadeIn();
+                loadProductList();
+            });
+
+            $("#show-flavors").click(function() {
+                $("#flavors-popup").fadeIn();
+                loadFlavorsList();
+            });
+            $("#insert-flavor-btn").click(function() {
+                $("#new-flavor-form").fadeIn();
+            });
+
+            $("#show-shipping").click(function() {
+                $("#shipping-popup").fadeIn();
+                loadShippingList();
+            });
+            $("#insert-shipping-btn").click(function() {
+                $("#new-shipping-form").fadeIn();
+            });
+
+            $("#close-popup").click(function() {
+                $("#products-popup").fadeOut();
+            });
+            $("#close-flavors-popup").click(function() {
+                $("#flavors-popup").fadeOut();
+            });
+            $("#close-insert-flavors-popup").click(function() {
+                $("#new-flavor-form").fadeOut();
+            });
+            $("#close-shipping-popup").click(function() {
+                $("#shipping-popup").fadeOut();
+            });
+            $("#close-insert-shipping-popup").click(function() {
+                $("#new-shipping-form").fadeOut();
+            });
+
+            $("#close-product-edit-popup").click(function() {
+                    $("#product-edit-popup").fadeOut();
+            });
+            
+
+        });
+
+        function loadProductList() {
+            // Use AJAX to fetch product data from the server
+            $.ajax({
+                url: "/api/products",
+                method: "GET",
+                success: function(products) {
+                    displayProductList(products);
+                },
+                error: function(err) {
+                    console.error("Error fetching product data: " + err);
+                }
+            });
+        }
+
+        function displayProductList(products) {
+            // Create HTML for each product and append it to the product list
+            var productListHtml = "";
+            products.forEach(function(product) {
+                productListHtml += `<div class="product-item">
+                                        <img src="${product.product_image}" alt="${product.product_name}">
+                                        <h3>${product.product_name}</h3>
+                                        <p>Constant Price: ${product.constant_price}</p>
+                                        <select class="categories" multiple>
+                        
+                                            ${product.categories}
+                                        </select>
+                                        <button class="edit-product" data-product-id="edit-${product.product_id}">Edit</button>
+                                        <button class="delete-product" data-product-id="delete-${product.product_id}">Delete</button>
+                                    </div>`;
+            });
+
+            $("#product-list").html(productListHtml);
+
+            // Add event listener for edit and delete buttons
+            $(".edit-product").click(function() {
+                var productId = $(this).data("product-id");
+                var product_id = productId.replace("edit-", "");
+                console.log("Id of clicked button", product_id);
+                $.ajax({
+                url: `/api/products/${product_id}`,  // Update the URL to match the server-side route
+                method: "GET",
+                success: function(product) {
+                    $("#product-edit-popup").fadeIn();
+                    loadProductEditFields(product);
+
+                },
+                error: function(err) {
+                    console.error("Error fetching product details: " + err);
+                    // Handle errors or display an error message to the user
+                }
+            });    
+            });
+
+            $(".delete-product").click(function() {
+                var productId = $(this).data("product-id");
+                deleteProduct(productId);
+            });
+        }
+
+        function loadProductEditFields(product) {
+            // Assuming you have a container with the ID "product-edit-popup"
+            var container = $("#product-to-edit");
+            container.empty();
+            // Assuming product is an object with attributes like product_image, product_name, constant_price, etc.
+            var editableFieldsHtml = `
+               
+                <img id="product_image" class="icon-size" src="${product.product_image}" alt="Product Image">
+                
+                <input type="file" id="productImageInput" value="${product.product_image} onchange="previewImage(this)">
+
+                <label for="productNameInput">Product Name:</label>
+                <input type="text" id="productNameInput" value="${product.product_name}">
+
+                <label for="constantPriceInput">Constant Price:</label>
+                <input type="text" id="constantPriceInput" value="${product.constant_price}">
+
+                <label for="shortDescriptionInput">Short Description:</label>
+                <textarea id="shortDescriptionInput">${product.short_description}</textarea>
+
+                <label for="longDescriptionInput">Long Description:</label>
+                <textarea id="longDescriptionInput">${product.long_description}</textarea>
+
+                <label for="minimumSizeInput">Minimum Size:</label>
+                <input type="text" id="minimumSizeInput" value="${product.minimum_size}">
+            `;
+
+            // Append the generated HTML to the container
+            container.append(editableFieldsHtml);
+        }
+
+
+        function deleteProduct(productId) {
+            // Confirm with the user before deleting
+            var product_id = productId.replace("delete-", "");
+            var confirmDelete = confirm("Are you sure you want to delete this product?");
+            
+            if (confirmDelete) {
+                // Make an AJAX request to delete the product
+                $.ajax({
+                    url: `/api/products/${product_id}`,  // Assuming you have an endpoint to handle delete requests
+                    method: "DELETE",
+                    success: function(response) {
+                        console.log("Product deleted successfully", response);
+                        loadProductList();
+                        // Optionally, you can update the UI or perform additional actions
+                        // For example, you can remove the deleted product from the displayed list
+                    },
+                    error: function(err) {
+                        console.error("Error deleting product: " + err);
+                        // Handle errors or display an error message to the user
+                    }
+                });
+            }
+        }
+
+        function previewImage(input) {
+            var preview = document.getElementById('previewImage');
+            var file = input.files[0];
+
+            if (file) {
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                };
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+
+
+        function editProduct(productId) {
+            // Make an AJAX request to fetch product details
+            $.ajax({
+                url: '/api/products/' + productId, // Replace with your actual API endpoint
+                method: 'GET',
+                success: function(product) {
+                    // Update HTML elements for editing
+                    $('#product-title').attr('contenteditable', 'true');
+                    $('#constant-price').attr('contenteditable', 'true');
+                    $('#categories').attr('disabled', false);
+                    $('#update-button').text('Update');
+
+                    // Populate fields with fetched product details
+                    $('#product-title').text(product.product_name);
+                    $('#constant-price').text(product.constant_price);
+
+                    // Set selected category in the dropdown
+                    $('#categories').val(product.category);
+
+                    // Add event listener to the "Update" button
+                    $('#update-button').on('click', function() {
+                        // Implement the update functionality
+                        // Make AJAX request to update the product
+                        // Show success message and close the popup
+                    });
+                },
+                error: function(err) {
+                    console.error('Error fetching product details:', err);
+                }
+            });
+        }
+
+        function loadFlavorsList() {
+            // Use AJAX to fetch product data from the server
+            $.ajax({
+                url: "/get_flavors",
+                method: "GET",
+                success: function(flavors) {
+                    displayFlavorsList(flavors);
+                },
+                error: function(err) {
+                    console.error("Error fetching flavors data: " + err);
+                }
+            });
+        }
+
+        function displayFlavorsList(flavors) {
+            // Create HTML for each product and append it to the product list
+            var flavorsListHtml = "";
+            flavors.forEach(function(flavor) {
+                flavorsListHtml += `<div class="flavor-item">
+                                        <h3>${flavor.name}</h3>
+                                        <p>Price: ${flavor.price}</p>
+                                    </div>`;
+                                });
+
+            $("#flavors-list").html(flavorsListHtml);
+        }
+
+        $('#new-flavor-form').submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            $.ajax({
+                url: '/api/insert-flavor',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    // Reload gallery container with updated images
+                    console.log("Data sent to python route");
+                },
+                cache: false,
+                contentType: false,
+                processData: false,
+            });
+        });
+
+        //shipping
+        function loadShippingList() {
+            // Use AJAX to fetch product data from the server
+            $.ajax({
+                url: "/get_shipping",
+                method: "GET",
+                success: function(shipping) {
+                    console.log("Shipping: ", shipping);
+                    displayShippingList(shipping);
+                },
+                error: function(err) {
+                    console.error("Error fetching shipping data: " + err);
+                }
+            });
+        }
+
+        function displayShippingList(shipping) {
+            // Create HTML for each product and append it to the product list
+            var shippingListHtml = "";
+            shipping.forEach(function(ship) {
+                shippingListHtml += `<div class="shipping-item">
+                                        <h3>${ship.area}</h3>
+                                        <p>Price: ${ship.charges}</p>
+                                    </div>`;
+                                });
+
+            $("#shipping-list").html(shippingListHtml);
+        
+        }
+
+        $('#new-shipping-form').submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            $.ajax({
+                url: '/api/insert-shipping',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    console.log("Data sent to python route");
+                    loadShippingList();
+                },
+                cache: false,
+                contentType: false,
+                processData: false,
+            });
+        });
+
+    </script>
+
+<script>
+
+    $(document).ready(function() {
+        // Open gallery viewer when input is clicked
+        $(document).on('click', '#product_image', function() {
+            // Store the input field's ID in localStorage
+            console.log("image clicked");
+            localStorage.setItem('lastClickedInput', 'review_images');
+            $("#gallery-viewer").fadeIn();
+        });
+
+        
+        $('#upload-form').submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            $.ajax({
+                url: '/api/upload-images',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    // Reload gallery container with updated images
+                    $('#gallery-container').html(response.html);
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+        });
+
+        function updateGallery() {
+            // Fetch image paths using AJAX
+            $.ajax({
+                url: '/api/get-existing-images',  // Replace with your API endpoint URL
+                type: 'GET',
+                success: function(response) {
+                    // Clear the gallery container
+                    var galleryContainer = $('#gallery-container');
+                    galleryContainer.empty();
+
+                    // Populate the gallery container with images
+                    response.forEach(function(imagePath) {
+                        console.log(imagePath);
+                        var img = $('<img>').attr('src', imagePath).attr('alt', 'Image').attr('width', '150px');
+                        galleryContainer.append(img);
+                    });
+                },
+                error: function(error) {
+                    console.error('Error fetching image paths:', error);
+                }
+            });
+        }
+
+        // Update the gallery immediately and then poll for updates
+        updateGallery();
+        //setInterval(updateGallery, 5000); // Update every 5 seconds (adjust interval as needed)
+
+        var selectedImages = [];  // To store selected image paths
+        $(document).on('click', '#gallery-container img', function() {
+            var lastClickedInputID = localStorage.getItem('lastClickedInput');
+            
+            var imagePath = $(this).attr('src');
+            
+            if (lastClickedInputID == 'product_image') {
+                if (selectedImages.length === 1 && selectedImages[0] === imagePath) {
+                    // Deselect the image
+                    selectedImages.pop();
+                    $(this).removeClass('selected');
+                } else {
+                    // Deselect the previous selected image (if any)
+                    if (selectedImages.length === 1) {
+                        var previousSelectedImagePath = selectedImages.pop();
+                        $('#gallery-container img[src="' + previousSelectedImagePath + '"]').removeClass('selected');
+                    }
+                    
+                    // Select the new image
+                    selectedImages.push(imagePath);
+                    $(this).addClass('selected');
+                }
+            } else {
+                // Toggle selection for non-'product_image' cases
+                if (selectedImages.includes(imagePath)) {
+                    // Image is already selected, deselect it
+                    var index = selectedImages.indexOf(imagePath);
+                    selectedImages.splice(index, 1);
+                    $(this).removeClass('selected');
+                } else {
+                    // Image is not selected, select it
+                    selectedImages.push(imagePath);
+                    $(this).addClass('selected');
+                }
+            }
+        });
+
+        var reviewImageContainer = $('#review_images_display');
+        var productImageContainer = $('#product_image_display')
+        $(document).on('click', '#submit_selection', function() {
+            // Get the stored input field ID from cache
+            var lastClickedInputID = localStorage.getItem('lastClickedInput');
+            console.log(lastClickedInputID);
+
+            // Update the hidden input field with the selected image paths
+            if (lastClickedInputID) {
+                var selectedImagePathsInput = $('#selected_image_paths');
+                var productSelectedImagePathsInput = $('#product_selected_image_paths')
+                if(lastClickedInputID=='review_images'){
+                    selectedImagePathsInput.val(selectedImages.join(', '));  // Assign selected images as a comma-separated list
+                }
+                if(lastClickedInputID == 'product_image'){
+                    productSelectedImagePathsInput.val(selectedImages.join(', '));
+                }
+                
+                if(lastClickedInputID == 'product_image'){
+                    productImageContainer.empty();
+                }
+                if(lastClickedInputID == 'review_images'){
+                    reviewImageContainer.empty();
+                }
+
+                selectedImages.forEach(function(imagePath) {
+                        var img = $('<img>').attr('src', imagePath).attr('alt', 'Image').attr('width', '80px');
+                        if(lastClickedInputID == 'review_images'){
+                            reviewImageContainer.append(img);
+                        }
+                        if(lastClickedInputID == 'product_image'){
+                            productImageContainer.append(img);
+                        }
+                    });
+            }
+
+            // Clear the selected images array and remove stored input field ID from cache
+            selectedImages = [];
+            localStorage.removeItem('lastClickedInput');
+            $('#gallery-container img.selected').removeClass('selected');
+            $('#gallery-viewer').addClass('hidden-gallery');
+        });
+
+
+        $(document).on('click', '#close-gallery-viewer-button', function(){
+            console.log("close gallery viewer button pressed");
+            $('#gallery-viewer').addClass('hidden-gallery');
+        });
+
+    });
+</script>
+</body>
+</html>
+
+    
