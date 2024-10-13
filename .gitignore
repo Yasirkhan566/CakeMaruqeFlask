@@ -1,0 +1,43 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+*.pyd
+*.pdb
+
+# Virtual Environment
+venv/
+.env
+env/
+.env.local
+.env.production
+.venv/
+
+# Flask specific files
+instance/
+*.sqlite3
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Log files
+*.log
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Backup files
+*.bak
+*.tmp
+
+# Other
+*.pot
+*.pyc
