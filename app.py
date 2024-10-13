@@ -42,6 +42,8 @@ app.config['MAIL_DEFAULT_SENDER'] = 'youremail@gmail.com'
 
 mail = Mail(app)
 
+application = app
+
 
 @app.before_first_request
 def initialize_counters():
@@ -429,4 +431,4 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
